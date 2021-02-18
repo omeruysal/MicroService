@@ -1,0 +1,45 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: account-service #bu id li servis icin konfigurasyonlar
+          uri: lb://ACCOUNT-SERVICE #eureka serverdaki ismi olmali
+          predicates:
+            - Path=/account/**
+          filters:
+            - RewritePath=/(?<segment>.*), /$\{segment}
+            - name: Hystrix
+              args:
+                name: account-service
+                fallbackUri: forward:/fb/account
+
+        - id: ticket-service
+          uri: lb://TICKET-SERVICE
+          predicates:
+            - Path=/ticket/**
+          filters:
+            - RewritePath=/(?<segment>.*), /$\{segment}
+            - name: Hystrix
+              args:
+                name: ticket-service
+                fallbackUri: forward:/fb/ticket
+
+eureka: #eureka serverin adresini bilmeli cunku servis kayitlari eureka uzerinde durur
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8500/eureka/
+    register-with-eureka: false
+  instance:
+    preferIpAddress: true
+
+management: #hystrix durumlarini herkesin gormesine izin veririz
+  endpoints:
+    web:
+      exposure:
+        include: "*"

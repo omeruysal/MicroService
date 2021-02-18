@@ -1,0 +1,22 @@
+server:
+  port: 8503
+
+
+spring:
+  application:
+    name: notification-service
+  rabbitmq:
+    username: root
+    password: 12345678
+  cloud:
+    stream:
+      bindings:
+        input:
+          destination: msqueue
+  
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8500/eureka/
